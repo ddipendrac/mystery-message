@@ -1,59 +1,68 @@
-import dbConnect from "@/lib/dbConnect";
-import UserModel from "@/model/User";
-import { z } from "zod";
-import { usernameValidation } from "@/schemas/signUpSchema";
+// Import necessary dependencies for database connection, user model, and validation
+import dbConnect from "@/lib/dbConnect"; // Function to establish a connection to the database.
+import UserModel from "@/model/User"; // Mongoose model for the User collection in the database.
+import { z } from "zod"; // Zod library for schema validation.
+import { usernameValidation } from "@/schemas/signUpSchema"; // Custom username validation schema.
 
-
+// Define a schema to validate the query parameters in the GET request using Zod.
 const UsernameQuerySchema = z.object({
-  username: usernameValidation
-})
+  username: usernameValidation // Using the custom username validation schema defined elsewhere.
+});
 
-export async function GET(request:Request) {
-  
-  await dbConnect()
-  // localhost:3000/api/abc?username=dipendra?phone=android
+export async function GET(request: Request) {
+  // Establish connection to the database
+  await dbConnect();
+
   try {
-    // get search params from url
-    const {searchParams} = new URL(request.url)
-    // get username from query of url
+    // Get search parameters (query parameters) from the URL.
+    const { searchParams } = new URL(request.url);
+
+    // Extract the "username" parameter from the URL's query string.
     const queryParam = {
       username: searchParams.get("username")
+    };
+
+    // Validate the query parameter using the Zod schema.
+    const result = UsernameQuerySchema.safeParse(queryParam);
+
+    // If validation fails, return a 400 error with the validation error messages.
+    if (!result.success) {
+      const usernameErrors = result.error.format().username?._errors || [];
+      return Response.json({
+        success: false,
+        message: usernameErrors?.length > 0 ? usernameErrors.join(', ') : 'Invalid query parameters'
+      }, { status: 400 });
     }
-    // validation with zod
-    const result = UsernameQuerySchema.safeParse(queryParam)
-   console.log(result) 
-   if (!result.success) {
-    const usernameErrors = result.error.format().username?._errors || []
+
+    // Destructure the validated username from the result data.
+    const { username } = result.data;
+
+    // Check if the username already exists in the database and is verified.
+    const existingVerifiedUser = await UserModel.findOne({ username, isVerified: true });
+
+    // If the username already exists and is verified, return a 400 error.
+    if (existingVerifiedUser) {
+      return Response.json({
+        success: false,
+        message: 'Username is already taken'
+      }, { status: 400 });
+    }
+
+    // If no user is found with the given username, return success with a message.
     return Response.json({
-      success: false,
-      message: usernameErrors?.length > 0 ? usernameErrors.join(', ') : 'Invalid query parameters'
-    }, {status: 400})
-   }
-
-   const {username} = result.data
-
-   const existingVerifiedUser = await UserModel.findOne({ username, isVerified: true})
-
-   if (existingVerifiedUser) {
-    return Response.json({
-      success: false,
-      message: 'Username is already taken'
-    }, {status: 400})
-   }
-
-   return Response.json({
-    success: true,
-    message: 'Username is unique'
-  }, {status: 200})
+      success: true,
+      message: 'Username is unique'
+    }, { status: 200 });
 
   } catch (error) {
-    console.error("Error checking username", error)
+    // If there is any error during the process, log the error and return a 500 response.
+    console.error("Error checking username", error);
     return Response.json(
       {
         success: false,
         message: "Error checking username"
       },
       { status: 500 }
-    )
+    );
   }
 }
