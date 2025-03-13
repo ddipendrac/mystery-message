@@ -1,4 +1,20 @@
-// Import necessary functions and libraries
+// This code handles a POST request to fetch messages for the authenticated user.
+
+// 🚀 Steps:
+// Connects to Database → Establishes a MongoDB connection using dbConnect().
+// Checks Authentication → Retrieves the logged-in user session via getServerSession(authOptions).
+// Validates User → If no session is found, it returns an unauthorized (401) response.
+// Fetches Messages → Uses MongoDB aggregation to:
+// Find the user by _id.
+// Unwind the messages array (to process each message separately).
+// Sort messages by createdAt in descending order.
+// Group messages back into an array.
+// Returns Response:
+// ✅ If messages exist, sends { success: true, messages: [...] }.
+// ❌ If the user has no messages, returns { success: false, message: "User not found" }.
+// ❌ On errors, returns { success: false, message: "Internal server error" }.
+
+
 import { getServerSession } from "next-auth"; // Function to retrieve the current session.
 import { authOptions } from "../auth/[...nextauth]/options"; // Authentication options used by NextAuth.
 import dbConnect from "@/lib/dbConnect"; // Function to connect to the MongoDB database.

@@ -1,4 +1,13 @@
-// Import necessary dependencies for database connection, user model, and validation
+// Database Connection → Connects to MongoDB using dbConnect().
+// Extracts Query Parameter → Retrieves username from the request URL.
+// Validates Username → Uses Zod to ensure the username meets defined rules.
+// Checks Database → Searches for an existing verified user with the same username.
+// Response Handling:
+// ✅ If the username is unique, returns { success: true, message: "Username is unique" }.
+// ❌ If the username exists, returns { success: false, message: "Username is already taken" }.
+// ❌ If validation fails or an error occurs, returns appropriate error messages.
+
+
 import dbConnect from "@/lib/dbConnect"; // Function to establish a connection to the database.
 import UserModel from "@/model/User"; // Mongoose model for the User collection in the database.
 import { z } from "zod"; // Zod library for schema validation.

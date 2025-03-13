@@ -1,3 +1,6 @@
+// Configure NextAuth options for authentication.
+// Set up a credentials provider for custom authentication.
+
 // Import necessary dependencies for NextAuth.
 import { NextAuthOptions } from "next-auth"; // Types for configuring NextAuth.
 import CredentialsProvider from "next-auth/providers/credentials"; // Credentials provider for custom authentication.

@@ -1,4 +1,13 @@
-// Import necessary modules
+// Connects to the database using dbConnect().
+// Extracts the username and code from the request body(Frontend).
+// Finds the user in the database using the username.
+// Validates the verification code:
+// If the user is not found, it returns a "User not found" error.
+// If the code matches and hasn't expired, it marks the user as verified.
+// If the code has expired, it prompts the user to sign up again.
+// If the code is incorrect, it returns an "Incorrect verification code" error.
+// Handles errors gracefully, logging them and returning a 500 status if something goes wrong.
+
 import UserModel from "@/model/User"; // Mongoose model for the User collection
 import { z } from "zod"; // Zod is used for validation (though it's not being utilized here)
 import dbConnect from "@/lib/dbConnect"; // Function to connect to the MongoDB database
